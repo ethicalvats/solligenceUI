@@ -1,14 +1,23 @@
-import React, { useContext, useState } from "react"
+import React, { useContext, useEffect, useState } from "react"
 import { View, Button, TextInput } from "react-native"
 import { rootStyles as styles } from "./styles";
 import {ProfileCtx} from "./ProfileCtx"
 
 const EditProfile = () => {
 
-    const {Save, Load} = useContext(ProfileCtx)
+    const {Save, fName, lName} = useContext(ProfileCtx)
 
     const [fnameValue, setFnameValue] = useState('Enter Fname')
     const [lnameValue, setLnameValue] = useState('Enter Lname')
+
+    useEffect(() => {
+        if(fName){
+            setFnameValue(fName)
+        }
+        if(lName){
+            setLnameValue(lName)
+        }
+    }, [fName, lName])
 
     const inputChangeHandler = (value, tag) => {
         if(tag === 'fname'){
@@ -16,11 +25,6 @@ const EditProfile = () => {
         }else{
             setLnameValue(value)
         }
-    }
-
-    const onLoad = (data) => {
-        setFnameValue(data.fName)
-        setLnameValue(data.lName)
     }
 
     return (
@@ -31,7 +35,6 @@ const EditProfile = () => {
                 fname: fnameValue,
                 lname: lnameValue
             })} />
-            <Button title={"Load"} onPress={() => Load(onLoad)} />
         </View>
     )
 }

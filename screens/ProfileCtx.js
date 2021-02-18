@@ -1,33 +1,56 @@
-import React, { createContext, useState } from "react"
-
+import React, { createContext, useState, useEffect } from "react"
+import {AsyncStorage} from "react-native"
 export const ProfileCtx = createContext({}) // 1: create a context
 
 // 2: define a provider component for that context
 const ProfileProvider = ({children}) => {
 
-    const [fName, setFname] = useState('Input Fname')
-    const [lName, setLname] = useState('Input Lname')
+    const STORAGE_KEY = "Profile:key"
 
-    const Save = (data) => {
-        setFname(data.fname)
-        setLname(data.lname)
+    const _setData = async (data) => {
+        const res = await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data))
+        return res
     }
 
-    const Load = (cb) => {
+    const _getData = async () => {
+        const res = await AsyncStorage.getItem(STORAGE_KEY)
+        return JSON.parse(res)
+    }
 
-        return cb({
-            fName,
-            lName
+    const [fName, setFname] = useState('')
+    const [lName, setLname] = useState('')
+
+    useEffect(() => {
+        _getData()
+            .then(data => {
+                setFname(data.fname)
+                setLname(data.lname)
+            })
+    }, [])
+
+    const Save = (data) => {
+        // setFname(data.fname)
+        // setLname(data.lname)
+        _setData(data)
+        .then(res => {
+            console.log("Success")
+            return _getData()
+        })
+        .then(data => {
+            setFname(data.fname)
+            setLname(data.lname)
+        })
+        .catch(err => {
+            console.log("Fail")
         })
     }
 
     // 3: pass the value to the context provider
     return (
         <ProfileCtx.Provider value={{
-                fName,
-                lName,
-                Save,
-                Load
+            fName, 
+            lName,
+                Save
             }} >
             {children}
         </ProfileCtx.Provider>
